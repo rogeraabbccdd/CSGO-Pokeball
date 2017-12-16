@@ -1,0 +1,27 @@
+Vertexlitgeneric
+{
+	// BASE SETTINGS
+	$basetexture	"akami/weapons/pokeball/pokeball_gs"
+	$bumpmap 	"akami/weapons/pokeball/pokeball_gs_normal"
+
+	//PHONG
+	$phong     1
+	$phongboost		  1.6
+	$phongfresnelranges      	"[1 8 6]"
+	$phongtint 		"[.25 .23 .128]"
+	$phongexponenttexture 	"akami/weapons/pokeball/pokeball_exp"
+	$phongalbedotint		1
+	$phongalbedoboost		64
+	$normalmapalphaphongmask    1
+
+	//ENVIRONMENT REFLECTION
+	$envmap "env_cubemap"
+	$envmaptint "[2.4 1.4 .2]"
+	$normalmapalphaenvmapmask 1
+
+	//RIM LIGHT
+	$rimlight 	1
+	$rimlightexponent 	24	
+	$rimlightboost	1.6
+	$rimmask		1
+}

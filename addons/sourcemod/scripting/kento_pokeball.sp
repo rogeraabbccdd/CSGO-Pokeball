@@ -13,15 +13,15 @@ int PlayerModelIndex[MAXPLAYERS+1];
 #define POKEBALL_WMODEL "models/akami/weapons/pokeball/w_pokeball.mdl"
 
 // Cvars
-ConVar Cvar_He, Cvar_Flash, Cvar_Decoy, Cvar_Smoke, Cvar_Inc, Cvar_Molotov;
-char Skin_He[64], Skin_Flash[64], Skin_Decoy[64], Skin_Smoke[64], Skin_Inc[64], Skin_Molotov[64];
+ConVar Cvar_He, Cvar_Flash, Cvar_Decoy, Cvar_Smoke, Cvar_Inc, Cvar_Molotov, Cvar_Flag;
+char Skin_He[64], Skin_Flash[64], Skin_Decoy[64], Skin_Smoke[64], Skin_Inc[64], Skin_Molotov[64], Flag[AdminFlags_TOTAL];
 
 public Plugin myinfo = 
 {
 	name = "Pokeball Nades",
 	author = "Kento",
 	description = "Pokeball Nades",
-	version = "1.0",
+	version = "1.1",
 	url = "http://steamcommunity.com/id/kentomatoryoshika/"
 };
 
@@ -37,6 +37,7 @@ public void OnPluginStart()
 	Cvar_Smoke = CreateConVar("pokeball_smoke", "15", "Skin of pokeball smokegrenade.", FCVAR_NOTIFY, true, -1.0, true, 23.0);
 	Cvar_Inc = CreateConVar("pokeball_inc", "12", "Skin of pokeball incgrenade.", FCVAR_NOTIFY, true, -1.0, true, 23.0);
 	Cvar_Molotov = CreateConVar("pokeball_molotov", "12", "Skin of pokeball molotov.", FCVAR_NOTIFY, true, -1.0, true, 23.0);
+	Cvar_Flag = CreateConVar("pokeball_flag", "", "Flag to use pokeball, blank = disabled");
 	
 	Cvar_He.AddChangeHook(OnConVarChanged);
 	Cvar_Flash.AddChangeHook(OnConVarChanged);
@@ -44,6 +45,7 @@ public void OnPluginStart()
 	Cvar_Smoke.AddChangeHook(OnConVarChanged);
 	Cvar_Inc.AddChangeHook(OnConVarChanged);
 	Cvar_Molotov.AddChangeHook(OnConVarChanged);
+	Cvar_Flag.AddChangeHook(OnConVarChanged);
 	
 	AutoExecConfig(true, "kento_pokeball");
 }
@@ -56,6 +58,7 @@ public void OnConfigsExecuted()
 	Cvar_Smoke.GetString(Skin_Smoke, sizeof(Skin_Smoke));
 	Cvar_Inc.GetString(Skin_Inc, sizeof(Skin_Inc));
 	Cvar_Molotov.GetString(Skin_Molotov, sizeof(Skin_Molotov));
+	Cvar_Flag.GetString(Flag, sizeof(Flag));
 }
 
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -66,6 +69,7 @@ public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] n
 	else if (convar == Cvar_Smoke)	Cvar_Smoke.GetString(Skin_Smoke, sizeof(Skin_Smoke));
 	else if (convar == Cvar_Inc)	Cvar_Inc.GetString(Skin_Inc, sizeof(Skin_Inc));
 	else if (convar == Cvar_Molotov)	Cvar_Molotov.GetString(Skin_Molotov, sizeof(Skin_Molotov));
+	else if (convar == Cvar_Flag)	Cvar_Flag.GetString(Flag, sizeof(Flag));
 }
 
 public void OnMapStart() 
@@ -167,6 +171,8 @@ public void WeaponDeployPost(int client, int iWeapon)
 {
 	char iWeaponClass[64];
 	GetEntityClassname(iWeapon, iWeaponClass, sizeof(iWeaponClass));
+	
+	if(!CanUsePokeball(client))	return;
 
 	if(StrEqual(iWeaponClass, "weapon_hegrenade"))
 	{
@@ -286,6 +292,8 @@ public void OnEntitySpawned(int entity)
 	
 	int owner = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
 	
+	if(!CanUsePokeball(owner))	return;
+	
 	if(StrContains(class_name, "projectile") != -1 && IsValidEntity(entity) && IsValidClient(owner))
 	{
 		if(StrContains(class_name, "hegrenade") != -1)
@@ -351,5 +359,15 @@ public void OnEntitySpawned(int entity)
 			SetEntityModel(entity, POKEBALL_WMODEL);
 			DispatchKeyValue(entity, "skin", Skin_Molotov);
 		}
+	}
+}
+
+stock bool CanUsePokeball(int client)
+{
+	if(StrEqual(Flag, "") || StrEqual(Flag, " "))	return true;
+	else
+	{
+		if (CheckCommandAccess(client, "pokeball", ReadFlagString(Flag), true))	return true;
+		else return false;
 	}
 }
